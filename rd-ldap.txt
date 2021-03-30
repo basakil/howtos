@@ -1,0 +1,306 @@
+
+
+???
+
+,dc=aob,dc=net
+
+Turkce karakter test:
+Çök ünemlı BİR kişi
+
+
+
+netsh int ipv4 get dynamicportrange tcp
+spring.sleuth.sampler.percentage = 0.2
+
+
+app:
+http://192.168.66.66:30080/
+
+kiali:
+http://192.168.66.66:30163/ 
+
+jaeger ui: (mapped from all in one)
+http://192.168.66.66:31686/
+
+grafana ui:
+http://192.168.66.66:31002/
+
+http://aob01.aob.net:5150/auth/realms/sampler-realm/account
+
+g.9UKzzTt2
+
+
+CN=Administrator,CN=Users,DC=aob,DC=local
+
+
+
+
+D:(A;;RPWPCRCCDCLCLOLORCWOWDSDDTDTSW;;;DA)(A;;RPWPCRCCDCLCLORCWOWDSDDTSW;;;SY)(A;;RPLCLORC;;;AU)
+
+(&(objectCategory=Person)(sAMAccountName=*)(memberOf=cn=sampler,cn=Users,cn=dc=aob,dc=local))
+
+Authorization: Negotiate 'spnego-token'
+
+
+Browser needs to have SPNEGO enabled. Different browsers do that differently. You enable a specific URL for SPNEGO
+
+ -pass password1!
+ktpass -out sampler-keycloak.keytab -princ HTTP/aob01.aob.net@AOB.LOCAL -mapUser sampler-keycloak@AOB.LOCAL -kvno 0 -ptype KRB5_NT_PRINCIPAL -crypto RC4-HMAC-NT
+
+ldifde /f sampler_keycloak_keytab_principal.ldf /d "CN=sampler keycloak,CN=Users,DC=aob,DC=local" /p base /l samaccountname,userprincipalname
+
+
+
+kerberos udp 88 by default
+
+
+Roles:
+realm vs client roles
+
+## Mappers:
+MSAD mapper: userAccountControl, pwdLastSet in ldap. 
+  if pwdLastSet is 0, UPDATE_PASSWORD required action is added.
+  userAccountControl = 514, == user is disabled.  
+
+
+dn: CN=Administrators,CN=Builtin,DC=aob,DC=local
+objectClass: group
+member: CN=Domain Admins,CN=Users,DC=aob,DC=local
+member: CN=Enterprise Admins,CN=Users,DC=aob,DC=local
+member: CN=Administrator,CN=Users,DC=aob,DC=local
+
+
+Keycloak does not list users if it cannot reach ldap server..? :
+  Note: Users are already in DB.
+
+Caused by: org.keycloak.models.ModelException: Querying of LDAP failed org.keycloak.storage.ldap.idm.query.internal.LDAPQuery@512d78b6
+keycloak04_1     |      at org.keycloak.storage.ldap.idm.store.ldap.LDAPIdentityStore.fetchQueryResults(LDAPIdentityStore.java:207)
+keycloak04_1     |      at org.keycloak.storage.ldap.idm.query.internal.LDAPQuery.getResultList(LDAPQuery.java:164)
+keycloak04_1     |      ... 87 more
+keycloak04_1     | Caused by: javax.naming.CommunicationException: windcserver.aob.local:636 [Root exception is java.net.ConnectException: Connection timed out (Connection timed out)]
+
+
+#TODO: test openid connect sequence..
+
++ keycloak has Docker Registry v2 Authentication support
+    http(s)://authserver.host/auth/realms/{realm-name}/protocol/docker-v2
+
+keycloak, wso2, gluu?, cas, Shibboleth (SAML) :
+  alternatives comparison: https://gist.github.com/bmaupin/6878fae9abcb63ef43f8ac9b9de8fafd
+
+
+keycloak does local auth. after identity brokering..
+  makes user federation at first login
+
+
+##### AD FS - Identity Brokering ##########
+
+ADFS already supports SAML 2.0, support for OpenID Connect:
+  https://docs.microsoft.com/en-us/windows-server/identity/ad-fs/development/enabling-openid-connect-with-ad-fs
+
+Cert:
+
+The subject name and subject alternative name must contain your federation service name, such as fs.contoso.com.
+
+The subject alternative name must contain the value enterpriseregistration that is followed by the User Principal Name (UPN) suffix of your organization, for example, enterpriseregistration.corp.contoso.com.
+
+#TODO :: New CSR => sign in CA ...
+
+# Service Account:
+created new user for service account: adfssa, password same, in domain admins groups. Runned the following
+
+setspn -a host/windcserver.aob.local adfssa
+ERRd.. new domain an service account needed??
+
+
+https://www.keycloak.org/2017/03/how-to-setup-ms-ad-fs-30-as-brokered.html
+is (incoming) https required for keycloak ???
+::
+### new SAML v2.0 identity provider
+
+AD FS descriptor
+  https://fs.domain.name/FederationMetadata/2007-06/FederationMetadata.xml
+
+Redirect uri: http://aob01.aob.net:5150/auth/realms/sampler-realm/broker/windcserver-adfs-saml/endpoint
+
+federation metadata import: https://windcserver.aob.local/FederationMetadata/2007-06/FederationMetadata.xml
+
+open distro for elasticsearch !!!!!
+
+
+spring-boot native...
+
+
+porbabilistic sampling vs remote sampling ...
+kiali...
+
+-- 58:14-11:44 => 11:49
+
+13:30 => 300sec timeout.
+
+13:35 => 
+
+
+## replace windows line endings..
+ sed -e 's/\r/\n/g' nench.sh > nench2.sh
+
+## CPU integer calc test, below 2s is desired
+ time $(i=0; while (( i < 99999 )); do (( i ++ )); done)
+
+## disk read test.., above x100MB/s is desired..
+sudo hdparm -t /dev/sda
+
+
+
+https://github.com/jeffhammond/STREAM.git
+
+<infogix install dir>/wildfly/IV/configuration/standalone-full-ha.xml
+<system-properties>
+    <property name="jboss.as.management.blocking.timeout" value="600"/>
+</system-properties>
+
+
+## Top stats:
+id > 25%, wa < 10%
+
+## view process info:
+ps -Flww -p THE_PID
+
+
+journalctl -r -u kubelet ## reverse
+
+kubelet galley dockerd
+
+
+nodeexporter image pull error..
+
+
+Keycloak renders HTML login screen together with status 401 and HTTP header WWW-Authenticate: Negotiate
+
+In case that the browser has Kerberos ticket from desktop login, it transfers the desktop sign on information to the Keycloak in header Authorization: Negotiate 'spnego-token' . Otherwise it just displays the login screen.
+
+the name:
+Windows Integrated Authentication
+enabled for IE ??
+
+C:\Users\domainuser1\AppData\Local\Google\Chrome\Application\chrome.exe –auth-server-whitelist=”.AOB.NET” –auth-negotiate-delegatewhitelist=”.AOB.NET” –auth-schemes=”digest,ntlm,negotiate”
+
+# minimum working:
+C:\Users\domainuser1\AppData\Local\Google\Chrome\Application\chrome.exe –auth-server-whitelist=”.AOB.NET” –auth-schemes=”negotiate”
+
+
+
+## ldaps:
+
+## import root cert to store
+$ keytool -import -keystore keycloak.jks -file root.crt -alias root
+
+# import certificate (key and cert should have the same alias) :
+keytool -import -alias yourdomain -keystore keycloak.jks -file your-certificate.cer
+
+keytool -list -keystore /home/mposolda/tmp/dev1xy.truststore
+
+## put custom scripts in keycloak:
+/opt/jboss/startup-scripts/
+
+## java opts env variable in keycloak:
+JAVA_OPTS_APPEND="-Dkeycloak.profile.feature.upload_script=enabled"
+-Djavax.net.debug=all ??
+
+
+##
+tls.crt & tls.key in /etc/x509/https/ auto enables https
+  => volumemounts may be inappropriate: @see https://hub.docker.com/r/jboss/keycloak/
+
+aob-local-root-ca
+
+389 
+ldaps 636
+
+-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+
+
+asl project management:
+sap - primera - bv
+
+DDS:
+cilium multicast desteklemiyor, weavenet destekliyor (Bryan Boreham).
+
+hikikomori
+
+
+
+https://web.mit.edu/kerberos/krb5-1.12/doc/admin/conf_files/krb5_conf.html
+
+ keytool -import -trustcacerts -alias aob-local-root-ca -file aob-local-root-ca.cer -keystore keycloak.jks
+
+
+<spi name="truststore">
+    <provider name="file" enabled="true">
+        <properties>
+            <property name="file" value="/etc/aob-local.jks"/>
+            <property name="password" value="password"/>
+            <property name="hostname-verification-policy" value="WILDCARD"/>
+            <property name="disabled" value="false"/>
+        </properties>
+    </provider>
+</spi>
+
+
+ /opt/jboss/tools/docker-entrypoint.sh
+
+ /opt/jboss/keycloak/standalone/configuration/standalone.xml
+ /opt/jboss/keycloak/standalone/configuration/standalone-ha.xml
+
+ /etc/aob-local.jks
+
+
+ Keystore /opt/jboss/keycloak/standalone/configuration/application.keystore not found, it will be auto generated on first use with a self signed certificate for host localhost
+
+
+## custom user federtion mapper:
+https://github.com/keycloak/keycloak-documentation/blob/master/server_development/topics/user-federation-mapper.adoc
+https://github.com/keycloak/keycloak/blob/master/federation/ldap/src/main/java/org/keycloak/storage/ldap/LDAPStorageProvider.java
+
+
+# disable-enable daemonset
+kubectl -n <namespace> patch daemonset <name-of-daemon-set> -p '{"spec": {"template": {"spec": {"nodeSelector": {"non-existing": "true"}}}}}'
+
+kubectl -n <namespace> patch daemonset <name-of-daemon-set> --type json -p='[{"op": "remove", "path": "/spec/template/spec/nodeSelector/non-existing"}]'
+
+git log --pretty=format:%h,%an,%aD,%s > ./GitLog.csv
+
+https://cpu.userbenchmark.com/SpeedTest/497415/IntelR-XeonR-E-2176M--CPU---270GHz
+https://cpu.userbenchmark.com/SpeedTest/141655/IntelR-XeonR-CPU-E5-2620-v4---210GHz
+
+
+kubectl proxy
+go tool pprof http://localhost:8001/api/v1/proxy/nodes/<node_name>/debug/pprof/profile
+
+/var/log/kubelet.log
+
+ bounce containerd ??
+
+ top htop
+ 1 5 15 mins
+ nice: -20-+19
+ priority = nice + 20 => 0-+39
+ M P N T => sort
+ k => kill
+ H => switch processed vs threads view...
+ c (-c) => full path
+ V => treeView
+ u (-u) => processes from a user
+ o => filter, = => remove filters
+
+
+latest istio      is 1.9.2 :  MAR.25
+latest prometheus is 2.22.2:  NOV.16 ... no release for 4 months.
+latest grafana    is 7.5   :  MAR.25
+
+istio 1.9.0 (current) uses (FEB.09):
+  - prometheus 2.21.0 (200911 : SEP.11)
+  - grafana 7.2.1 (SEP.11)
+
